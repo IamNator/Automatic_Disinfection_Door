@@ -112,4 +112,3 @@ void DS1307::fillByYMD(uint16_t _year, uint8_t _month, uint8_t _day) {
 void DS1307::fillDayOfWeek(uint8_t _dow) {
     dayOfWeek = _dow;
 }
-

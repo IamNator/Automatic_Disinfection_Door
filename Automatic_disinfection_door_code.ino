@@ -1,7 +1,9 @@
 //Includes
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
-include 'DS1307.h'
+#include "DS1307.h" //for Temperature
+#include "U8glib.h" //128X64 LCD display
+
  
 //Pin Declearation
 
@@ -25,14 +27,15 @@ include 'DS1307.h'
 
 
 unsigned int isPerson = 0;
-Adafruit_MLX90614 temp = Adafruit_MLX90614();
+Adafruit_MLX90614 temp = Adafruit_MLX90614(); //for temperature (temperature object)
+U8GLIB_ST7920_128X64_1X u8g(28, 27, 26);  // SPI Com: SCK = en = 28, MOSI = rw = 27, CS = di = 26
 
 void isPersonISR(){
   isPerson = 1;
 }
 
-int takeTemperature(){
-  int bodyTemperature = temp.readObjectTempC();
+float takeTemperature(){
+  float bodyTemperature = temp.readObjectTempC();
   //Serial.print("Body Temperature = "); Serial.print(bodyTemperature); Serial.println("*C"); //For Debugging
   //To be Implimented later: Give green lights then return true
   return bodyTemperature;
@@ -47,6 +50,19 @@ int takeTemperature(){
 //    clock.setTime();//write time to the RTC chip
 //}
 //
+
+void draw(void) {
+  // graphic commands to redraw the complete screen should be placed here  
+  u8g.setFont(u8g_font_unifont); //set font
+  u8g.drawStr( 0, 22, "Little Tech!");
+}
+
+void buidPage(){
+  u8g.firstPage();  
+  do {
+    draw();
+  } while( u8g.nextPage() ); //u8g.nextPage == 1 when catch is full 
+}
 
 
 void setup() {
@@ -69,7 +85,7 @@ void setup() {
 void loop() {
 
   while(isPerson){
-     int body_temperature = takeTemperature();
+     float body_temperature = takeTemperature();
      if (body_temperature > 30 && body_temperature <= 38.1){
       digitalWrite(PUMP, HIGH);
       digitalWrite(UV,HIGH);
