@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <Adafruit_MLX90614.h> //for Temperature
 #include "DS1307.h" //for RTC 
-#include <U8g2.h> //128X64 LCD display
+#include <U8x8lib.h> //128X64 LCD display
 
 
 //Pin Declearation
@@ -28,7 +28,7 @@
 
 unsigned int isPerson = 0;
 Adafruit_MLX90614 temp = Adafruit_MLX90614(); //for temperature (temperature object)
-U8GLIB_ST7920_128X64_1X u8g(RD, WR, VO);  // SPI Com: SCK = en = 28, MOSI = rw = 27, CS = di = 26
+U8X8_ST7920_128X64_1X u8x8(RD, WR, VO);  // SPI Com: SCK = en = 28, MOSI = rw = 27, CS = di = 26
 
 void isPersonISR(){
   isPerson = 1;
@@ -53,15 +53,15 @@ float takeTemperature(){
 
 void draw(void){
   // graphic commands to redraw the complete screen should be placed here
-  u8g.setFont(u8g_font_unifont); //set font
-  u8g.drawStr( 0, 22, "Little Tech!");
+  u8x8.setFont(u8g_font_unifont); //set font
+  u8x8.drawStr( 0, 22, "Little Tech!");
 }
 
 void buildPage(){
-  u8g.firstPage();
+  u8x8.firstPage();
   do {
     draw();
-  } while ( u8g.nextPage() ); //u8g.nextPage == 1 when catch is full
+  } while ( u8x8.nextPage() ); //u8g.nextPage == 1 when catch is full
 }
 
 
