@@ -1,10 +1,10 @@
 //Includes
 #include <Wire.h>
-#include <Adafruit_MLX90614.h>
-#include "DS1307.h" //for Temperature
-#include "U8glib.h" //128X64 LCD display
+#include <Adafruit_MLX90614.h> //for Temperature
+#include "DS1307.h" //for RTC 
+#include <U8g2.h> //128X64 LCD display
 
- 
+
 //Pin Declearation
 
 //OUTPUT 1|0 PINS
@@ -13,22 +13,22 @@
 #define UV 25
 
 //OUTPUT CMPLX PINS
-#define RD 28
-#define WR 27
-#define VO 26
+#define RD 28 //E - en - SCK
+#define WR 27 //RW - rw - MOSI
+#define VO 26 //D/I - id - CS 
 
 
 //INPUT 1|0 PINS
 #define PIR 14
 //INPUT I2C PINS
-//
+
 //#define I2C_SDA 21
 //#define I2C_SCL 22
 
 
 unsigned int isPerson = 0;
 Adafruit_MLX90614 temp = Adafruit_MLX90614(); //for temperature (temperature object)
-U8GLIB_ST7920_128X64_1X u8g(28, 27, 26);  // SPI Com: SCK = en = 28, MOSI = rw = 27, CS = di = 26
+U8GLIB_ST7920_128X64_1X u8g(RD, WR, VO);  // SPI Com: SCK = en = 28, MOSI = rw = 27, CS = di = 26
 
 void isPersonISR(){
   isPerson = 1;
@@ -51,17 +51,17 @@ float takeTemperature(){
 //}
 //
 
-void draw(void) {
-  // graphic commands to redraw the complete screen should be placed here  
+void draw(void){
+  // graphic commands to redraw the complete screen should be placed here
   u8g.setFont(u8g_font_unifont); //set font
   u8g.drawStr( 0, 22, "Little Tech!");
 }
 
-void buidPage(){
-  u8g.firstPage();  
+void buildPage(){
+  u8g.firstPage();
   do {
     draw();
-  } while( u8g.nextPage() ); //u8g.nextPage == 1 when catch is full 
+  } while ( u8g.nextPage() ); //u8g.nextPage == 1 when catch is full
 }
 
 
@@ -75,30 +75,32 @@ void setup() {
   pinMode(PIR, INPUT);
 
   //INTERRUPT PIN
-  attachInterrupt(PIR,isPersonISR,RISING);
+  attachInterrupt(PIR, isPersonISR, RISING);
   Serial.begin(9600);//for serial monitor debugging
+  DS1307 clock;
+  clock.begin();
   clock.getTime();
-  
+
 }
 
 
 void loop() {
 
-  while(isPerson){
-     float body_temperature = takeTemperature();
-     if (body_temperature > 30 && body_temperature <= 38.1){
+  while (isPerson) {
+    float body_temperature = takeTemperature();
+    if (body_temperature > 30 && body_temperature <= 38.1) {
       digitalWrite(PUMP, HIGH);
-      digitalWrite(UV,HIGH);
-      delay(10*1000); //delay for 15secs
-      digitalWrite(PUMP,LOW);
-      digitalWrite(UV,LOW);
-     }
-     else if(body_temperature > 38.1){
+      digitalWrite(UV, HIGH);
+      delay(10 * 1000); //delay for 15secs
+      digitalWrite(PUMP, LOW);
+      digitalWrite(UV, LOW);
+    }
+    else if (body_temperature > 38.1) {
       digitalWrite(BUZZER, HIGH);
       delay(2500); //delays for 2.5secs
-      digitalWrite(BUZZER,LOW);
-     }
-     isPerson = 0;
+      digitalWrite(BUZZER, LOW);
+    }
+    isPerson = 0;
   }
-
+  buildPage();
 }
