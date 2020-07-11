@@ -3,7 +3,7 @@
 #include <Adafruit_MLX90614.h> //for Temperature
 #include "DS1307.h" //for RTC 
 #include <U8x8lib.h> //128X64 LCD display
-
+#include <U8g2lib.h>
 
 //Pin Declearation
 
@@ -12,11 +12,11 @@
 #define BUZZER 23
 #define UV 25
 
-//OUTPUT CMPLX PINS
+/*//OUTPUT CMPLX PINS
 #define RD 28 //E - en - SCK
 #define WR 27 //RW - rw - MOSI
 #define VO 26 //D/I - id - CS 
-
+*/
 
 //INPUT 1|0 PINS
 #define PIR 14
@@ -28,11 +28,14 @@
 
 unsigned int isPerson = 0;
 Adafruit_MLX90614 temp = Adafruit_MLX90614(); //for temperature (temperature object)
-U8X8_ST7920_128X64_1X u8x8(RD, WR, VO);  // SPI Com: SCK = en = 28, MOSI = rw = 27, CS = di = 26
+//U8G2_ST7920_128X64_1X u8g2(RD, WR, VO);  // SPI Com: SCK = en = 28, MOSI = rw = 27, CS = di = 26
+U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, /* clock=*/ 28, /* data=*/ 27, /* CS=*/ 26, /* reset=*/ 29);//U8G2_R0, /* clock=*/ 13, /* data=*/ 11, /* CS=*/ 10, /* reset=*/ 8
 
+//INTERRUPTS ########################################################################################################
 void isPersonISR(){
   isPerson = 1;
 }
+
 
 float takeTemperature(){
   float bodyTemperature = temp.readObjectTempC();
@@ -41,27 +44,23 @@ float takeTemperature(){
   return bodyTemperature;
 }
 
-//void setTimeOnce()
-//{
-//    clock.begin();
-//    clock.fillByYMD(2020,07,11);//Jan 19,2013
-//    clock.fillByHMS(15,28,30);//15:28 30"
-//    clock.fillDayOfWeek(FRI);//Saturday
-//    clock.setTime();//write time to the RTC chip
-//}
-//
+
+
+
+
+//DISPLAY ##############################################################################################################
 
 void draw(void){
   // graphic commands to redraw the complete screen should be placed here
-  u8x8.setFont(u8g_font_unifont); //set font
-  u8x8.drawStr( 0, 22, "Little Tech!");
+  u8g2.setFont(u8g_font_unifont); //set font
+  u8g2.drawStr( 0, 22, "Little Tech!");
 }
 
 void buildPage(){
-  u8x8.firstPage();
+  u8g2.firstPage();
   do {
     draw();
-  } while ( u8x8.nextPage() ); //u8g.nextPage == 1 when catch is full
+  } while ( u8g2.nextPage() ); //u8g.nextPage == 1 when catch is full
 }
 
 
@@ -104,3 +103,17 @@ void loop() {
   }
   buildPage();
 }
+
+/*COMMENTED FUNCTIONS
+ * 
+ * 
+//void setTimeOnce()
+//{
+//    clock.begin();
+//    clock.fillByYMD(2020,07,11);//Jan 19,2013
+//    clock.fillByHMS(15,28,30);//15:28 30"
+//    clock.fillDayOfWeek(FRI);//Saturday
+//    clock.setTime();//write time to the RTC chip
+//}
+//
+*/
