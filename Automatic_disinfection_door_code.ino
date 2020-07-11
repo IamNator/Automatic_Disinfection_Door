@@ -1,5 +1,5 @@
 //Includes
-#include <Wire.h>
+
 #include <Adafruit_MLX90614.h> //for Temperature
 #include "DS1307.h" //for RTC 
 #include <U8x8lib.h> //128X64 LCD display
@@ -27,11 +27,15 @@
 
 
 unsigned int isPerson = 0;
+float body_temperature = 0.00; 
 Adafruit_MLX90614 temp = Adafruit_MLX90614(); //for temperature (temperature object)
 //U8G2_ST7920_128X64_1X u8g2(RD, WR, VO);  // SPI Com: SCK = en = 28, MOSI = rw = 27, CS = di = 26
 U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, /* clock=*/ 28, /* data=*/ 27, /* CS=*/ 26, /* reset=*/ 29);//U8G2_R0, /* clock=*/ 13, /* data=*/ 11, /* CS=*/ 10, /* reset=*/ 8
 
-//INTERRUPTS ########################################################################################################
+//OTHER FUNCTIONS
+
+
+//################    INTERRUPTS    #####################################################################
 void isPersonISR(){
   isPerson = 1;
 }
@@ -48,12 +52,18 @@ float takeTemperature(){
 
 
 
-//DISPLAY ##############################################################################################################
-
+//#################     DISPLAY     ##################################################################
 void draw(void){
   // graphic commands to redraw the complete screen should be placed here
   u8g2.setFont(u8g_font_unifont); //set font
-  u8g2.drawStr( 0, 22, "Little Tech!");
+  
+  char body_temperature_str[5];
+  char others[20];  
+  strcpy(body_temperature_str, u8x8_u8toa(body_temperature, 4));
+  strcpy(others, "Body Temperature :");
+  strcat(others, body_temperature_str);
+  
+  u8g2.drawStr( 0, 22, others );
 }
 
 void buildPage(){
@@ -62,6 +72,14 @@ void buildPage(){
     draw();
   } while ( u8g2.nextPage() ); //u8g.nextPage == 1 when catch is full
 }
+
+
+
+
+
+
+
+
 
 
 void setup() {
@@ -86,7 +104,7 @@ void setup() {
 void loop() {
 
   while (isPerson) {
-    float body_temperature = takeTemperature();
+    body_temperature = takeTemperature();
     if (body_temperature > 30 && body_temperature <= 38.1) {
       digitalWrite(PUMP, HIGH);
       digitalWrite(UV, HIGH);

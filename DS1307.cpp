@@ -27,8 +27,10 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 */
-
+#ifndef WIRE_H
 #include <Wire.h>
+#endif
+
 #include "DS1307.h"
 
 uint8_t DS1307::decToBcd(uint8_t val) {
